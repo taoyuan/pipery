@@ -2,12 +2,15 @@ import Emittery, {EventName} from 'emittery';
 
 type PromiseOrValue<T> = Promise<T> | T;
 
-export type TransformFn<T = any, R = any> = (value: T, pipeline: Pipeline<any>) => PromiseOrValue<R>;
+export type TransformFn<T = unknown, P extends Pipeline<T> = Pipeline<T>> = (
+  value: any,
+  pipeline: P,
+) => PromiseOrValue<any>;
 
-export class Pipeline<EventData extends Record<EventName, any> = {}> extends Emittery<EventData> {
-  protected _pipes: TransformFn[] = [];
+export class Pipeline<T = unknown, EventData extends Record<EventName, any> = object> extends Emittery<EventData> {
+  protected _pipes: TransformFn<T>[] = [];
 
-  get pipes(): TransformFn[] {
+  get pipes(): TransformFn<T>[] {
     return this._pipes;
   }
 
@@ -54,7 +57,7 @@ export class Pipeline<EventData extends Record<EventName, any> = {}> extends Emi
    * @param fn
    * @returns
    */
-  pipe(fn: TransformFn) {
+  pipe(fn: TransformFn<T>) {
     this._pipes.push(fn);
     return this;
   }
@@ -64,7 +67,7 @@ export class Pipeline<EventData extends Record<EventName, any> = {}> extends Emi
    * @param fn
    * @param position
    */
-  pipeInsert(fn: TransformFn, position: number) {
+  pipeInsert(fn: TransformFn<T>, position: number) {
     this._pipes.splice(position, 0, fn);
   }
 
@@ -73,10 +76,10 @@ export class Pipeline<EventData extends Record<EventName, any> = {}> extends Emi
    * @param data
    * @returns
    */
-  async execute(data?: unknown) {
+  async execute(data?: T) {
     let result = data;
     for (const fn of this._pipes) {
-      result = await fn(result, this);
+      result = await fn(result, this as Pipeline<T, any>);
     }
     return result;
   }
@@ -86,9 +89,9 @@ export class Pipeline<EventData extends Record<EventName, any> = {}> extends Emi
    * @param data
    * @returns
    */
-  executeSync(data?: unknown) {
+  executeSync(data?: T) {
     for (const fn of this._pipes) {
-      data = fn(data, this);
+      data = fn(data, this as Pipeline<T, any>);
     }
     return data;
   }
