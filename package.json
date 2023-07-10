@@ -1,6 +1,6 @@
 {
   "name": "pipery",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A powerful pipeline implementation for asynchronous data transformation and event-driven programming.",
   "keywords": [],
   "author": "TY <towyuan@outlook.com>",
