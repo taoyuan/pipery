@@ -98,6 +98,20 @@ describe('Pipeline', () => {
       expect(fn1).toHaveBeenCalledWith(2, pipeline);
       expect(fn2).toHaveBeenCalledWith(3, pipeline);
     });
+
+    it('should execute the pipeline asynchronously and pass previous param if returns undefined', async () => {
+      const fn1: TransformFn = jest.fn((data: number) => data + 1);
+      const fn2: TransformFn = jest.fn((data: number) => undefined);
+      const fn3: TransformFn = jest.fn((data: number) => data * 2);
+      pipeline.pipe(fn1);
+      pipeline.pipe(fn2);
+      pipeline.pipe(fn3);
+      const result = await pipeline.execute(2);
+      expect(result).toBe(6); // (2 + 1) * 2
+      expect(fn1).toHaveBeenCalledWith(2, pipeline);
+      expect(fn2).toHaveBeenCalledWith(3, pipeline);
+      expect(fn3).toHaveBeenCalledWith(3, pipeline);
+    });
   });
 
   describe('executeSync', () => {
@@ -110,6 +124,20 @@ describe('Pipeline', () => {
       expect(result).toBe(6); // (2 + 1) * 2
       expect(fn1).toHaveBeenCalledWith(2, pipeline);
       expect(fn2).toHaveBeenCalledWith(3, pipeline);
+    });
+
+    it('should execute the pipeline synchronously and pass previous param if returns undefined', () => {
+      const fn1: TransformFn = jest.fn((data: number) => data + 1);
+      const fn2: TransformFn = jest.fn((data: number) => undefined);
+      const fn3: TransformFn = jest.fn((data: number) => data * 2);
+      pipeline.pipe(fn1);
+      pipeline.pipe(fn2);
+      pipeline.pipe(fn3);
+      const result = pipeline.executeSync(2);
+      expect(result).toBe(6); // (2 + 1) * 2
+      expect(fn1).toHaveBeenCalledWith(2, pipeline);
+      expect(fn2).toHaveBeenCalledWith(3, pipeline);
+      expect(fn3).toHaveBeenCalledWith(3, pipeline);
     });
   });
 });

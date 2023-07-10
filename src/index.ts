@@ -77,11 +77,13 @@ export class Pipeline<T = unknown, EventData extends Record<EventName, any> = ob
    * @returns
    */
   async execute(data?: T) {
-    let result = data;
     for (const fn of this._pipes) {
-      result = await fn(result, this as Pipeline<T, any>);
+      const result = await fn(data, this as Pipeline<T, any>);
+      if (result !== undefined) {
+        data = result;
+      }
     }
-    return result;
+    return data;
   }
 
   /**
@@ -91,7 +93,10 @@ export class Pipeline<T = unknown, EventData extends Record<EventName, any> = ob
    */
   executeSync(data?: T) {
     for (const fn of this._pipes) {
-      data = fn(data, this as Pipeline<T, any>);
+      const result = fn(data, this as Pipeline<T, any>);
+      if (result !== undefined) {
+        data = result;
+      }
     }
     return data;
   }
